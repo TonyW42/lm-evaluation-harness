@@ -76,6 +76,7 @@ def simple_evaluate(
     fewshot_random_seed: int = 1234,
     confirm_run_unsafe_code: bool = False,
     metadata: Optional[dict] = None,
+    add_pause_in_prompt: Optional[bool] = False,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -205,6 +206,21 @@ def simple_evaluate(
         if model_args is None:
             eval_logger.warning("model_args not specified. Using defaults.")
             model_args = ""
+        
+        if add_pause_in_prompt:
+            ## only add for HF models
+            additional_args = {
+                "batch_size": batch_size,
+                "max_batch_size": max_batch_size,
+                "device": device,
+                "add_pause_in_prompt": add_pause_in_prompt
+                }
+        else:
+            additional_args = {
+                "batch_size": batch_size,
+                "max_batch_size": max_batch_size,
+                "device": device,
+            }
 
         if isinstance(model_args, dict):
             eval_logger.info(
@@ -212,11 +228,7 @@ def simple_evaluate(
             )
             lm = lm_eval.api.registry.get_model(model).create_from_arg_obj(
                 model_args,
-                {
-                    "batch_size": batch_size,
-                    "max_batch_size": max_batch_size,
-                    "device": device,
-                },
+                additional_args,
             )
 
         else:
@@ -225,11 +237,7 @@ def simple_evaluate(
             )
             lm = lm_eval.api.registry.get_model(model).create_from_arg_string(
                 model_args,
-                {
-                    "batch_size": batch_size,
-                    "max_batch_size": max_batch_size,
-                    "device": device,
-                },
+                additional_args,
             )
     else:
         if not isinstance(model, lm_eval.api.model.LM):
