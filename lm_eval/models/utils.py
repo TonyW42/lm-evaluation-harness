@@ -246,6 +246,9 @@ class MultiTokenEOSCriteria(transformers.StoppingCriteria):
         lookback_ids_batch = lookback_ids_batch[:, -self.sequence_id_len :]
 
         lookback_tokens_batch = self.tokenizer.batch_decode(lookback_ids_batch)
+        lookback_tokens_batch = [
+            text.replace("<|reserved_special_token_0|>", "") for text in lookback_tokens_batch
+            ]
 
         for i, done in enumerate(self.done_tracker):
             if not done:

@@ -865,7 +865,12 @@ class HFLM(TemplateLM):
         return encoding["input_ids"], encoding["attention_mask"]
 
     def tok_decode(self, tokens, skip_special_tokens=True):
-        return self.tokenizer.decode(tokens, skip_special_tokens=skip_special_tokens)
+        output = self.tokenizer.decode(tokens, skip_special_tokens=skip_special_tokens)
+        
+        output = output.replace("<|reserved_special_token_0|>", "")
+        
+        return output
+        
 
     def _model_call(self, inps, attn_mask=None, labels=None):
         """

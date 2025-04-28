@@ -345,9 +345,15 @@ class TemplateAPI(TemplateLM):
 
     def decode_batch(self, tokens: List[List[int]]) -> List[str]:
         if self.tokenizer_backend == "huggingface":
-            return self.tokenizer.batch_decode(tokens)
+            outputs = self.tokenizer.batch_decode(tokens)
         elif self.tokenizer_backend == "tiktoken":
-            return self.tokenizer.decode_batch(tokens)
+            outputs = self.tokenizer.decode_batch(tokens)
+        else:
+            outputs = tokens  # fallback: no decoding
+
+        # Post-process: remove the special token
+        cleaned_outputs = [text.replace("<|reserved_special_token_0|>", "") for text in outputs]
+        return cleaned_outputs
 
     def model_call(
         self,
