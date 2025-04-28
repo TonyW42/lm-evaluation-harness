@@ -1368,6 +1368,30 @@ class HFLM(TemplateLM):
                 left_truncate_len=max_ctx_len,
                 truncation=self.truncation,
             )
+            special_token_id = self.tokenizer.convert_tokens_to_ids("<|reserved_special_token_0|>")
+
+            modified_context_enc = []
+            for i in range(context_enc.size(0)):  # for each sample
+                tokens = context_enc[i]
+                new_tokens = [tokens[0]]
+
+                for tok in tokens[1:]:
+                    if torch.rand(1).item() < 0.1:
+                        new_tokens.append(special_token_id)
+                    new_tokens.append(tok)
+
+                modified_context_enc.append(torch.tensor(new_tokens, device=tokens.device))
+
+            max_len = max(x.size(0) for x in modified_context_enc)
+            padded_context_enc = []
+            for tokens in modified_context_enc:
+                pad_len = max_len - tokens.size(0)
+                padded = torch.cat([tokens, torch.full((pad_len,), self.tokenizer.pad_token_id, device=tokens.device)])
+                padded_context_enc.append(padded)
+
+            context_enc = torch.stack(padded_context_enc, dim=0)
+            attn_masks = (context_enc != self.tokenizer.pad_token_id).long()
+
             context_enc = context_enc.to(self.device)
             attn_masks = attn_masks.to(self.device)
 
