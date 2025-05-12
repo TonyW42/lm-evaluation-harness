@@ -870,6 +870,9 @@ class HFLM(TemplateLM):
         output = self.tokenizer.decode(tokens, skip_special_tokens=skip_special_tokens)
         
         output = output.replace("<|reserved_special_token_0|>", "")
+        print("=" * 20)
+        print(output)
+        print("=" * 20)
         
         return output
         
